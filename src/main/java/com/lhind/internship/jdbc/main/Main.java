@@ -13,8 +13,8 @@ public class Main {
         EmployeeRepository employeeRepository = new EmployeeRepository();
         Employee employee = new Employee();
 
-        employee.setEmployeeNumber(4);
-        employee.setFirstName("testing Save Insert");
+        employee.setEmployeeNumber(1);
+        employee.setFirstName("testing update Insert");
         employee.setLastName("test");
         employee.setExtension("");
         employee.setEmail("email");
@@ -35,7 +35,7 @@ public class Main {
 
         //employeeRepository.updateEmployee(employee);
 
-        //employeeRepository.save(employee);
+        employeeRepository.save(employee);
 
 
     }
