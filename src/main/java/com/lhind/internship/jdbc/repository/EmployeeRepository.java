@@ -72,14 +72,15 @@ public class EmployeeRepository implements Repository<Employee, Integer> {
 
     @Override
     public Employee save(final Employee employee) {
+        Optional<Employee> savedEmployee;
         if (exists(employee.getEmployeeNumber())) {
             System.out.println("Id exists... Going to update employee info.");
-            updateEmployee(employee);
+            savedEmployee= updateEmployee(employee);
         } else {
             System.out.println("ID does not exist, saving new employee");
-            insertEmployee(employee);
+            savedEmployee= insertEmployee(employee);
         }
-        return employee;
+        return savedEmployee.orElseThrow(() -> new RuntimeException("Save Not Executed"));
     }
 
     @Override
@@ -100,44 +101,31 @@ public class EmployeeRepository implements Repository<Employee, Integer> {
     }
 
 
-    public Optional<Employee> insertEmployee(final Employee employee) {
+    private Optional<Employee> insertEmployee(final Employee employee) {
         try {final Connection connection = JdbcConnection.connect() ;
             final PreparedStatement saveStatement = connection.prepareStatement(EmployeeQuery.INSERT_EMPLOYEE.getQuery());
 
-                saveStatement.setInt(1, employee.getEmployeeNumber());
-                saveStatement.setString(2, employee.getLastName());
-                saveStatement.setString(3, employee.getFirstName());
-                saveStatement.setString(4, employee.getExtension());
-                saveStatement.setString(5, employee.getEmail());
-                saveStatement.setString(6, employee.getOfficeCode());
-                saveStatement.setInt(7, employee.getReportsTo());
-                saveStatement.setString(8, employee.getJobTitle());
-                saveStatement.executeUpdate();
+            saveStatement.setInt(1, employee.getEmployeeNumber());
+            setEmployeeParams(saveStatement, employee, 2);
+            saveStatement.executeUpdate();
 
-                System.out.println("Inserted Employee: ");
-                return findById(employee.getEmployeeNumber());
+            System.out.println("Inserted Employee:");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        return Optional.empty();
+        return findById(employee.getEmployeeNumber());
     }
 
-    public Optional<Employee> updateEmployee(final Employee employee) {
+    private Optional<Employee> updateEmployee(final Employee employee) {
         try {
             final Connection connection = JdbcConnection.connect();
             final PreparedStatement updateStatement = connection.prepareStatement(EmployeeQuery.UPDATE_EMPLOYEE.getQuery());
 
-            updateStatement.setString(1, employee.getLastName());
-            updateStatement.setString(2, employee.getFirstName());
-            updateStatement.setString(3, employee.getExtension());
-            updateStatement.setString(4, employee.getEmail());
-            updateStatement.setString(5, employee.getOfficeCode());
-            updateStatement.setInt(6, employee.getReportsTo());
-            updateStatement.setString(7, employee.getJobTitle());
+            setEmployeeParams(updateStatement, employee, 1);
             updateStatement.setInt(8, employee.getEmployeeNumber());
             updateStatement.executeUpdate();
 
-            System.out.println("Updated employee: ");
+            System.out.println("Updated employee:");
             return findById(employee.getEmployeeNumber());
 
         } catch (SQLException throwables) {
@@ -145,4 +133,16 @@ public class EmployeeRepository implements Repository<Employee, Integer> {
         }
         return Optional.empty();
     }
+
+    private void setEmployeeParams(PreparedStatement ps, Employee employee, int startIndex) throws SQLException {
+        ps.setString(startIndex, employee.getLastName());
+        ps.setString(startIndex + 1, employee.getFirstName());
+        ps.setString(startIndex + 2, employee.getExtension());
+        ps.setString(startIndex + 3, employee.getEmail());
+        ps.setString(startIndex + 4, employee.getOfficeCode());
+        ps.setInt(startIndex + 5, employee.getReportsTo());
+        ps.setString(startIndex + 6, employee.getJobTitle());
+    }
+
+
 }
