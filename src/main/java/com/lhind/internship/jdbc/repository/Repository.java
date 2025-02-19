@@ -1,5 +1,7 @@
 package com.lhind.internship.jdbc.repository;
 
+import com.lhind.internship.jdbc.model.Employee;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +13,7 @@ public interface Repository<ENTITY, ID> {
 
     boolean exists(final ID id);
 
-    ENTITY save(final ENTITY entity);
+    Employee save(final ENTITY entity);
 
     void delete(final ID id);
 }
